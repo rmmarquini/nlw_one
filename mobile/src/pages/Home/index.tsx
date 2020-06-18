@@ -3,7 +3,8 @@ import {
     View, 
     Text, 
     Image, 
-    StyleSheet 
+    StyleSheet, 
+    ImageBackground
 } from 'react-native';
 import { AppLoading } from 'expo';
 import {
@@ -24,13 +25,21 @@ const Home = () => {
     if (!fontsLoaded) return <AppLoading />
 
     return (
-        <View style={styles.container}>
+        <ImageBackground 
+            source={require('../../assets/home-background.png')}
+            style={styles.container}
+            imageStyle={{ width: 274, height: 368 }}
+        >
             <View style={styles.main}>
                 <Image source={require('../../assets/logo.png')} />
                 <Text style={styles.title}>Seu marketplace de coleta de resíduos</Text>
                 <Text style={styles.description}>Ajudamos pessoas a encontrarem pontos de coleta de forma eficiente.</Text>
             </View>
-        </View>
+
+            <View style={styles.footer}>
+                
+            </View>
+        </ImageBackground>
     );
 }
 
