@@ -1,11 +1,35 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { 
+    View, 
+    Text, 
+    Image, 
+    StyleSheet 
+} from 'react-native';
+import { AppLoading } from 'expo';
+import {
+    useFonts,
+    Roboto_400Regular,
+    Roboto_500Medium
+} from '@expo-google-fonts/roboto';
+import { Ubuntu_700Bold } from '@expo-google-fonts/ubuntu';
 
 const Home = () => {
+
+    let [fontsLoaded] = useFonts({
+        Roboto_400Regular,
+        Roboto_500Medium,
+        Ubuntu_700Bold,
+    });
+
+    if (!fontsLoaded) return <AppLoading />
+
     return (
         <View style={styles.container}>
-            <Image source={require('../../assets/logo.png')} />
-            <Text>Hi Rafa!</Text>
+            <View style={styles.main}>
+                <Image source={require('../../assets/logo.png')} />
+                <Text style={styles.title}>Seu marketplace de coleta de resíduos</Text>
+                <Text style={styles.description}>Ajudamos pessoas a encontrarem pontos de coleta de forma eficiente.</Text>
+            </View>
         </View>
     );
 }
