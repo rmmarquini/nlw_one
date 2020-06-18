@@ -10,6 +10,9 @@ import './styles.css';
 
 import logo from '../../assets/logo.svg';
 
+/**
+ * Interfaces para utilizacao nos estados
+ */
 interface Item {
     id: number;
     title: string;
@@ -26,25 +29,31 @@ interface IBGECityResponse {
 
 const CreatePoint = () => {
 
+    // Constantes de estados referentes a manipulacao da API de maps
     const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0]);
     const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
     
+    // Constantes de estados referentes aos comportamentos de lista de estados e cidades adquiridos via api IBGE
     const [ufs, setUfs] = useState<string[]>([]);
     const [cities, setCities] = useState<string[]>([]);
     const [selectedUf, setSelectedUf] = useState("0");
     const [selectedCity, setSelectedCity] = useState("0");
     
+    // Constante de estados referente aos dados dos inputs do Form
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         wapp: '' 
     });
     
+    // Constantes de estado referentes a manipulacao dos seletores de itens de coleta
     const [items, setItems] = useState<Item[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
+    // History eh uma funcao para retornar o usuario a uma rota definida, rapidamente
     const history = useHistory();
     
+    // Hook para setar a coordenada informada pelo usuario
     useEffect( () => {
         navigator.geolocation.getCurrentPosition(position => {
             let { latitude, longitude } = position.coords;
@@ -52,6 +61,7 @@ const CreatePoint = () => {
         });
     }, []);
 
+    // Hook para obter os itens de coleta da RESTful API
     useEffect( () => {
         api.get('items')
             .then(res => {
@@ -62,6 +72,7 @@ const CreatePoint = () => {
             });
     }, []);
 
+    // Hook para obter as UFs atraves da requisicao feita na API IBGE
     useEffect( () => {
         ibgePlaces.get<IBGEUFResponse[]>('/estados?orderBy=nome')
             .then(res => {
@@ -73,6 +84,7 @@ const CreatePoint = () => {
             });
     }, []);
 
+    // Hook para obter os municipios atraves da requisicao feita na API IBGE
     useEffect( () => {
         if (selectedUf === '0') return;
 
@@ -87,6 +99,10 @@ const CreatePoint = () => {
 
     }, [selectedUf]);
 
+    /**
+     * Funcao para definir a lista de UFs 
+     * @param event 
+     */
     function handleSelectedUf(event: ChangeEvent<HTMLSelectElement>) {
         let uf = event.target.value;
         if (uf === "0") {
@@ -96,11 +112,19 @@ const CreatePoint = () => {
         setSelectedUf(uf);
     }
 
+    /**
+     * Funcao para definir a lista de municipios
+     * @param event 
+     */
     function handleSelectedCity(event: ChangeEvent<HTMLSelectElement>) {
         let city = event.target.value;
         setSelectedCity(city);
     }
 
+    /**
+     * Funcao para definir a coordenada selecionada pelo usuario
+     * @param event 
+     */
     function handleMapMarker(event: LeafletMouseEvent) {
         setSelectedPosition([
             event.latlng.lat,
@@ -108,11 +132,26 @@ const CreatePoint = () => {
         ]);
     }
 
+    /**
+     * Funcao para definir as informacoes preenchidas pelo usuario nos inputs
+     * Ao alterar o estado pelo setFormData, atraves do spread operator, eh 
+     * feita verificacao pela chave-valor do obj para nao escrever valor incorreto
+     * na chave errada.
+     * @param event 
+     */
     function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
         let { name, value } = event.target;
         setFormData({ ...formData, [name]: value });
     }
 
+    /**
+     * Funcao para definir os itens de coleta selecionados pelo usuario
+     * Se o item estiver selecionado, o spread operator, garante que se id
+     * nao sera sobrescrito qdo o estado for alterado. Caso um item for 
+     * desmarcado, atraves do metodo filter, garantimos que os demais itens
+     * nao sejam sobrescritos na alteracao do estado.
+     * @param id 
+     */
     function handleSelectedItem(id: number) {
         let alreadySelected = selectedItems.findIndex(item => item === id);
         if (alreadySelected >= 0) {
@@ -123,6 +162,13 @@ const CreatePoint = () => {
         }
     }
 
+    /**
+     * Funcao para enviar os dados via POST a API RESTful e cadastrar
+     * o ponto de coleta na base de dados
+     * Uma mesagem de retorno eh exibida se houver sucesso ou falha
+     * Se sucesso, redireciona o usuario para a pagina inicial
+     * @param event 
+     */
     async function handleSubmit(event: FormEvent) {
         event.preventDefault();
 
